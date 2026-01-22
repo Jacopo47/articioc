@@ -25,15 +25,3 @@ dependencies {
 tasks.test {
 	useJUnitPlatform()
 }
-
-publishing {
-	publications {
-		create<MavenPublication>(rootProject.name) {
-			from(components["java"])
-		}
-	}
-
-	repositories {
-		mavenLocal()
-	}
-}
