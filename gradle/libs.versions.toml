@@ -24,7 +24,7 @@ jdbi-core = {group = "org.jdbi", name = "jdbi3-core", version.ref= "jdbi"}
 jdbi-sqlobject = {group = "org.jdbi", name = "jdbi3-sqlobject", version.ref= "jdbi"}
 jdbi-stringtemplate4 = {group = "org.jdbi", name = "jdbi3-stringtemplate4", version.ref= "jdbi"}
 
-testcontainers-kafka = {group = "org.testcontainers", name = "kafka", version = "1.21.3"}
+testcontainers-kafka = {group = "org.testcontainers", name = "kafka", version = "1.21.4"}
 
 mockito = { group = "org.mockito", name = "mockito-core", version = "5.21.0" }
 
