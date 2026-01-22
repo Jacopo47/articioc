@@ -1,0 +1,24 @@
+[versions]
+vavr = "0.11.0"
+logback = "1.5.18"
+junitBom = "5.10.0"
+jackson = "2.20.1"
+
+
+[libraries]
+# Libraries
+vavr = { group = "io.vavr", name = "vavr", version.ref = "vavr" }
+logback-core = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
+logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version = "2.20" }
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
+
+
+# Platforms (BOMs)
+junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junitBom" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
+
+[bundles]
+jackson = ["jackson-annotations", "jackson-databind"]
+logback = ["logback-core", "logback-classic"]
+junit = ["junit-jupiter"]
