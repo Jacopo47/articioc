@@ -1,7 +1,7 @@
 [versions]
 vavr = "0.11.0"
 logback = "1.5.25"
-junitBom = "5.10.0"
+junitBom = "6.0.2"
 awaitility = "4.3.0"
 jackson = "2.21.0"
 kafka = "4.1.1"
