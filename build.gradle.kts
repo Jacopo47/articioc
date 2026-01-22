@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "org.articioc"
-version = "1.0.0-SNAPSHOT"
+version = "0.0.1-SNAPSHOT"
 
 repositories {
 	mavenCentral()
@@ -52,6 +52,15 @@ publishing {
 
 	repositories {
 		mavenLocal()
+        if (System.getenv("GITHUB_ACTOR") != null) {
+            maven {
+                url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
+        }
 	}
 }
 
@@ -108,4 +117,30 @@ allprojects {
 
 subprojects {
 	apply(plugin = "com.diffplug.spotless")
+
+
+
+    apply(plugin = "maven-publish")
+    apply(plugin = "java-library")
+
+    configure<PublishingExtension> {
+        publications {
+            register<MavenPublication>(rootProject.name) {
+                from(components["java"])
+            }
+        }
+
+        repositories {
+            mavenLocal()
+            if (System.getenv("GITHUB_ACTOR") != null) {
+                maven {
+                    url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
+                    credentials {
+                        username = System.getenv("GITHUB_ACTOR")
+                        password = System.getenv("GITHUB_TOKEN")
+                    }
+                }
+            }
+        }
+    }
 }

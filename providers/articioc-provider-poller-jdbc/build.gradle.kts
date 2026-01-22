@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.articioc"
-version = "1.0.0-SNAPSHOT"
+version = rootProject.version
 
 repositories {
 	mavenCentral()
