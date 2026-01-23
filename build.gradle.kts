@@ -92,6 +92,11 @@ allprojects {
 		}
 	}
 
+
+    if (!File(projectDir, "build.gradle.kts").exists()) {
+        logger.warn("Skipping publication for ${project.name} because is not a gradle project.")
+        return@allprojects
+    }
     apply(plugin = "maven-publish")
     apply(plugin = "java-library")
     configure<PublishingExtension> {
