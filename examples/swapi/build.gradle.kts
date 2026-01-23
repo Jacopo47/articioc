@@ -27,9 +27,9 @@ tasks.test {
 
 
 tasks.withType<PublishToMavenRepository>().configureEach {
-    enabled = false
+	enabled = false
 }
 
 tasks.withType<PublishToMavenLocal>().configureEach {
-    enabled = false
+	enabled = false
 }

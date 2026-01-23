@@ -3,12 +3,14 @@ package swapi;
 import static swapi.pipeline.Steps.*;
 
 import io.vavr.collection.Stream;
-import java.util.concurrent.CompletableFuture;
+
 import org.articioc.Articioc;
 import org.articioc.base.interfaces.Provider;
 import org.articioc.base.providers.InMemoryProvider;
 import swapi.http.StarWarsCharacter;
 import swapi.pipeline.Steps;
+
+import java.util.concurrent.CompletableFuture;
 
 public class Main {
 
@@ -20,7 +22,7 @@ public class Main {
         CompletableFuture.completedFuture(Stream.of(new StarWarsCharacterInMovie("A New Hope")));
 
     Provider<StarWarsCharacterInMovie> provider = new InMemoryProvider<>();
-    var articioc = new Articioc.Builder<>(provider, () -> input, MovieStep.WITH_MOVIE_TITLE);
+    var articioc = new Articioc.Builder<>(provider, MovieStep.WITH_MOVIE_TITLE);
 
     var steps = new Steps();
 
