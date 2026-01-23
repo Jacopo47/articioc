@@ -43,27 +43,6 @@ tasks.test {
 	useJUnitPlatform()
 }
 
-publishing {
-	publications {
-		create<MavenPublication>(rootProject.name) {
-			from(components["java"])
-		}
-	}
-
-	repositories {
-		mavenLocal()
-		if (System.getenv("GITHUB_ACTOR") != null) {
-			maven {
-				url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
-				credentials {
-					username = System.getenv("GITHUB_ACTOR")
-					password = System.getenv("GITHUB_TOKEN")
-				}
-			}
-		}
-	}
-}
-
 tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
@@ -81,6 +60,7 @@ tasks.jacocoTestCoverageVerification {
 	}
 	dependsOn(tasks.testCodeCoverageReport)
 	dependsOn(tasks.test)
+	mustRunAfter(tasks.withType<com.diffplug.gradle.spotless.SpotlessTask>())
 }
 
 tasks.check {
@@ -112,21 +92,23 @@ allprojects {
 			}
 		}
 	}
-}
 
 
-subprojects {
-	apply(plugin = "com.diffplug.spotless")
-
-
-
+	if (!File(projectDir, "build.gradle.kts").exists()) {
+		logger.warn("Skipping publication for ${project.name} because is not a gradle project.")
+		return@allprojects
+	}
 	apply(plugin = "maven-publish")
 	apply(plugin = "java-library")
-
 	configure<PublishingExtension> {
 		publications {
-			register<MavenPublication>(rootProject.name) {
+			create<MavenPublication>(rootProject.name) {
 				from(components["java"])
+
+				groupId = "org.articioc"
+
+				suppressPomMetadataWarningsFor("testFixturesApiElements")
+				suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
 			}
 		}
 
@@ -143,4 +125,9 @@ subprojects {
 			}
 		}
 	}
+}
+
+
+subprojects {
+	apply(plugin = "com.diffplug.spotless")
 }

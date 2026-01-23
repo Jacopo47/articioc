@@ -10,11 +10,9 @@ The core: define the pipeline with your business logic.
 
 ```java
 Provider<StarWarsCharacterInMovie> provider = new InMemoryProvider<>();
-var articioc = new Articioc.Builder<>(provider,
-    () -> CompletableFuture.completedFuture(Stream.of(new StarWarsCharacterInMovie("A New Hope"))),
-    MovieStep.WITH_MOVIE_TITLE);
+var builder = new Articioc.Builder<>(provider, MovieStep.WITH_MOVIE_TITLE);
 
-var pipeline = articioc
+var articioc = builder
     .addStep(steps::fetchFilmMetadata)
     .checkpoint(MovieStep.WITH_DETAILS)
     .addStep(steps::printFilmDetails)
@@ -22,8 +20,7 @@ var pipeline = articioc
     .addStep(steps::oneToAsManyCharactersInFilm)
     .addStep(steps::keepOnlyCharactersWithYellowEyeColor)
     .addStep(steps::orderByName)
-    .end()
-    .pipeline();
+    .end();
 ```
 
 

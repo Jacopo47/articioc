@@ -10,7 +10,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/articioc-base" />
-            <option value="$PROJECT_DIR$/articioc-core" />
             <option value="$PROJECT_DIR$/examples" />
             <option value="$PROJECT_DIR$/examples/swapi" />
             <option value="$PROJECT_DIR$/providers" />

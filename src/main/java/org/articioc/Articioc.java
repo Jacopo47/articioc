@@ -33,6 +33,9 @@ import org.articioc.interfaces.executors.AutonomousExecutor;
 import org.articioc.interfaces.executors.ToPipeline;
 import org.articioc.interfaces.manyTo.ManyToOperations;
 import org.articioc.interfaces.oneTo.OneToOperations;
+import org.articioc.interfaces.triggers.FutureTriggerOfMany;
+import org.articioc.interfaces.triggers.FutureTriggerOfOne;
+import org.articioc.interfaces.triggers.TriggerOfMany;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,7 +273,7 @@ public class Articioc<A extends Leaf<M>, M> implements ToPipeline<A, M>, Autonom
           EndlessOperations<Articioc.Builder<A, M>, A, M> {
 
     private final Provider<A> provider;
-    private final Supplier<CompletableFuture<Stream<A>>> trigger;
+    private Supplier<CompletableFuture<Stream<A>>> trigger;
     private final Step firstStep;
 
     private List<PipelineStep<A, Step>> builder;
@@ -290,6 +293,18 @@ public class Articioc<A extends Leaf<M>, M> implements ToPipeline<A, M>, Autonom
       this.currentStep = Pipeline.identity();
       this.currentErrorPipeline = ErrorPipeline.identity();
     }
+
+    public Builder(Provider<A> provider, TriggerOfMany<A> trigger, Step firstStep) {
+      this(provider, () -> CompletableFuture.completedFuture(trigger.get()), firstStep);
+    }
+
+    public Builder(Provider<A> provider, Step firstStep) {
+      this(provider, () -> CompletableFuture.completedFuture(Stream.empty()), firstStep);
+    }
+
+    public Builder<A, M> trigger(FutureTriggerOfMany<A> trigger) { this.trigger = trigger; return this; }
+    public Builder<A, M> trigger(FutureTriggerOfOne<A> trigger) { this.trigger = () -> trigger.get().thenApply(Stream::of); return this; }
+    public Builder<A, M> trigger(TriggerOfMany<A> trigger) { this.trigger = () -> CompletableFuture.completedFuture(trigger.get()); return this; }
 
     public Builder<A, M> checkpoint(Step next) {
       return this.checkpoint(next, new StepOptions<>());
