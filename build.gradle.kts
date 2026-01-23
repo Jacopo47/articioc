@@ -43,27 +43,6 @@ tasks.test {
 	useJUnitPlatform()
 }
 
-publishing {
-	publications {
-		create<MavenPublication>(rootProject.name) {
-			from(components["java"])
-		}
-	}
-
-	repositories {
-		mavenLocal()
-		if (System.getenv("GITHUB_ACTOR") != null) {
-			maven {
-				url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
-				credentials {
-					username = System.getenv("GITHUB_ACTOR")
-					password = System.getenv("GITHUB_TOKEN")
-				}
-			}
-		}
-	}
-}
-
 tasks.jacocoTestCoverageVerification {
 	violationRules {
 		rule {
@@ -112,35 +91,35 @@ allprojects {
 			}
 		}
 	}
+
+    apply(plugin = "maven-publish")
+    apply(plugin = "java-library")
+    configure<PublishingExtension> {
+        publications {
+            create<MavenPublication>(rootProject.name) {
+                from(components["java"])
+
+                suppressPomMetadataWarningsFor("testFixturesApiElements")
+                suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+            }
+        }
+
+        repositories {
+            mavenLocal()
+            if (System.getenv("GITHUB_ACTOR") != null) {
+                maven {
+                    url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
+                    credentials {
+                        username = System.getenv("GITHUB_ACTOR")
+                        password = System.getenv("GITHUB_TOKEN")
+                    }
+                }
+            }
+        }
+    }
 }
 
 
 subprojects {
 	apply(plugin = "com.diffplug.spotless")
-
-
-
-	apply(plugin = "maven-publish")
-	apply(plugin = "java-library")
-
-	configure<PublishingExtension> {
-		publications {
-			register<MavenPublication>(rootProject.name) {
-				from(components["java"])
-			}
-		}
-
-		repositories {
-			mavenLocal()
-			if (System.getenv("GITHUB_ACTOR") != null) {
-				maven {
-					url = uri("https://maven.pkg.github.com/Jacopo47/articioc")
-					credentials {
-						username = System.getenv("GITHUB_ACTOR")
-						password = System.getenv("GITHUB_TOKEN")
-					}
-				}
-			}
-		}
-	}
 }
