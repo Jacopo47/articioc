@@ -10,5 +10,9 @@ public interface ManyToOperations<E, A extends Leaf<M>, M> {
     return this.addStepImplementation(step.andThen(CompletableFuture::completedFuture));
   }
 
+  default E addStep(ManyToManyAsync<A> step) {
+    return this.addStepImplementation(step);
+  }
+
   E addStepImplementation(Function<Stream<A>, CompletableFuture<Stream<A>>> step);
 }
