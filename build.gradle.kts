@@ -99,6 +99,8 @@ allprojects {
             create<MavenPublication>(rootProject.name) {
                 from(components["java"])
 
+                groupId = "org.articioc"
+
                 suppressPomMetadataWarningsFor("testFixturesApiElements")
                 suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
             }
