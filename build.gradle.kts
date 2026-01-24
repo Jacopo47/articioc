@@ -1,3 +1,5 @@
+import com.diffplug.gradle.spotless.JavaExtension
+
 plugins {
 	id("java")
 	id("java-library")
@@ -14,18 +16,6 @@ version = "0.0.1-SNAPSHOT"
 
 repositories {
 	mavenCentral()
-}
-
-java {
-	withSourcesJar()
-	withJavadocJar()
-
-	targetCompatibility = JavaVersion.VERSION_17
-	sourceCompatibility = JavaVersion.VERSION_17
-
-	toolchain {
-		languageVersion.set(JavaLanguageVersion.of(17))
-	}
 }
 
 dependencies {
@@ -121,6 +111,18 @@ allprojects {
 
 				suppressPomMetadataWarningsFor("testFixturesApiElements")
 				suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+			}
+		}
+
+		java {
+			withSourcesJar()
+			withJavadocJar()
+
+			targetCompatibility = JavaVersion.VERSION_21
+			sourceCompatibility = JavaVersion.VERSION_21
+
+			toolchain {
+				languageVersion.set(JavaLanguageVersion.of(21))
 			}
 		}
 
