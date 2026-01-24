@@ -18,6 +18,7 @@
             <option value="$PROJECT_DIR$/providers/articioc-provider-poller-jdbc" />
             <option value="$PROJECT_DIR$/providers/articioc-provider-poller-jdbc-mariadb" />
             <option value="$PROJECT_DIR$/providers/articioc-provider-poller-jdbc-postgres" />
+            <option value="$PROJECT_DIR$/providers/articioc-provider-redis" />
           </set>
         </option>
       </GradleProjectSettings>

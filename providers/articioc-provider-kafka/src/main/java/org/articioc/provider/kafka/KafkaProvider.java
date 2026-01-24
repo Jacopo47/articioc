@@ -32,8 +32,7 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
       String topic,
       Properties consumerProperties,
       Properties producerProperties,
-      Duration pollTimeout)
-      throws ClassNotFoundException {
+      Duration pollTimeout) {
     this.topic = topic;
 
     consumerProperties.put(
