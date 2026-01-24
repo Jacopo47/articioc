@@ -40,7 +40,7 @@ class ArticiocManyToManyTest {
   }
 
   @Test
-  void BasicScenario_VerifyThatGeneratedMessageAreTreatIndependentlyWhencheckpointIsPerformed() {
+  void BasicScenario_VerifyThatGeneratedMessageAreTreatIndependentlyWhenCheckpointIsPerformed() {
     var record = new TestLeaf(TestStep._0);
 
     var input = CompletableFuture.completedFuture(Stream.of(record));
@@ -111,7 +111,7 @@ class ArticiocManyToManyTest {
     return input.sorted(Comparator.comparing(TestLeaf::getStep0));
   }
 
-  Stream<TestLeaf> distinct(Stream<TestLeaf> input) {
-    return input.distinct();
+  CompletableFuture<Stream<TestLeaf>> distinct(Stream<TestLeaf> input) {
+    return CompletableFuture.supplyAsync(input::distinct);
   }
 }
