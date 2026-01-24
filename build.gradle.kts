@@ -16,6 +16,18 @@ repositories {
 	mavenCentral()
 }
 
+java {
+	withSourcesJar()
+	withJavadocJar()
+
+	targetCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_17
+
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(17))
+	}
+}
+
 dependencies {
 	implementation(project(":articioc-base"))
 
