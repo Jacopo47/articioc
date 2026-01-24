@@ -15,9 +15,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.articioc.base.Leaf;
 import org.articioc.base.LeafCarrier;
-import org.articioc.base.interfaces.CommitOperation;
 import org.articioc.base.interfaces.Provider;
-import org.articioc.base.interfaces.RollbackOperation;
 import org.articioc.base.utils.Futures;
 import org.articioc.provider.kafka.serialization.JsonSerializer;
 
