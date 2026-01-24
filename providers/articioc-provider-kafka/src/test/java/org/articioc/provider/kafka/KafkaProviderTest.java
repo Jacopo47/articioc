@@ -2,6 +2,7 @@ package org.articioc.provider.kafka;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
 import java.util.Properties;
 import org.articioc.base.interfaces.Provider;
 import org.articioc.provider.kafka.containers.KafkaContainerTest;
@@ -32,7 +33,7 @@ class KafkaProviderTest extends KafkaContainerTest
     producerConf.put("bootstrap.servers", KAFKA_CONTAINER.getBootstrapServers());
     producerConf.put("client.id", InetAddress.getLocalHost().getHostName());
 
-    this.provider = new KafkaProvider<>(TestLeaf.class, "test-topic", consumerConf, producerConf);
+    this.provider = new KafkaProvider<>(TestLeaf.class, "test-topic", consumerConf, producerConf, Duration.ofSeconds(2));
   }
 
   @Override

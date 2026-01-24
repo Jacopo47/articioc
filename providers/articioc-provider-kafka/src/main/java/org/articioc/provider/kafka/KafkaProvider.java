@@ -15,7 +15,9 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.articioc.base.Leaf;
 import org.articioc.base.LeafCarrier;
+import org.articioc.base.interfaces.CommitOperation;
 import org.articioc.base.interfaces.Provider;
+import org.articioc.base.interfaces.RollbackOperation;
 import org.articioc.base.utils.Futures;
 import org.articioc.provider.kafka.serialization.JsonSerializer;
 
@@ -55,8 +57,7 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
   }
 
   public KafkaProvider(
-      Class<A> type, String topic, Properties consumerProperties, Properties producerProperties)
-      throws ClassNotFoundException {
+      Class<A> type, String topic, Properties consumerProperties, Properties producerProperties) {
     this(type, topic, consumerProperties, producerProperties, null);
   }
 
@@ -74,7 +75,15 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
                       new OffsetAndMetadata(r.offset())));
 
                   return v;
-                })))
+                }))
+                .withRollback(options -> CompletableFuture.supplyAsync(() -> {
+                  consumer.seek(
+                      new TopicPartition(r.topic(), r.partition()),
+                      new OffsetAndMetadata(r.offset()));
+
+                  return v;
+                }))
+            )
             .orElseThrow());
 
     return CompletableFuture.completedFuture(app);

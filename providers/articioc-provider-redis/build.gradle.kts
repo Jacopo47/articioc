@@ -22,6 +22,7 @@ dependencies {
 	testImplementation(platform(libs.junit.bom))
 	testImplementation(libs.bundles.junit)
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	testImplementation(libs.bundles.logback)
 
 
 	testImplementation(testFixtures(project(":")))
