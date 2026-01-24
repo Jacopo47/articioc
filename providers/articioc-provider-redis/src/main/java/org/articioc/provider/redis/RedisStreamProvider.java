@@ -11,6 +11,7 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisStreamAsyncCommands;
 import io.vavr.collection.Stream;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -33,6 +34,10 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
 
   private static final Logger logger = LoggerFactory.getLogger(RedisStreamProvider.class);
 
+  private static final Duration DEFAULT_READ_BLOCK_DURATION = Duration.ofSeconds(10);
+  private static final Duration DEFAULT_READ_CLAIM_DURATION = Duration.ofMinutes(5);
+  private static final long DEFAULT_SIZE_FOR_READ_RESULT = 50L;
+
   private final RedisClient client;
   private final String key;
   private final String consumerGroup;
@@ -42,18 +47,21 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
   private final XReadArgs.StreamOffset<String> offset;
   private final StatefulRedisConnection<String, String> connection;
   private final RedisStreamAsyncCommands<String, String> async;
+  private final XReadArgs consumerReadArguments;
 
   private final Class<A> typeOfA;
   private final MapToStreamEntry<A> mapper;
   private final ObjectMapper jsonMapper;
 
   public RedisStreamProvider(
+      Class<A> typeOfA,
       RedisClient client,
       String key,
       String consumerGroup,
       String consumerId,
       XReadArgs.StreamOffset<String> offset,
-      Class<A> typeOfA,
+      Long count,
+      XReadArgs consumerReadArguments,
       MapToStreamEntry<A> mapper,
       ObjectMapper json
   ) {
@@ -69,6 +77,12 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
     this.consumer = Consumer.from(this.consumerGroup, this.consumerId);
     this.offset = Optional.ofNullable(offset)
         .orElseGet(() -> XReadArgs.StreamOffset.lastConsumed(key));
+    var readCount = Optional.ofNullable(count)
+        .orElse(DEFAULT_SIZE_FOR_READ_RESULT);
+    this.consumerReadArguments = Optional.ofNullable(consumerReadArguments)
+        .orElseGet(() -> XReadArgs.Builder.block(DEFAULT_READ_BLOCK_DURATION)
+            .claim(DEFAULT_READ_CLAIM_DURATION))
+        .count(readCount);
 
     this.typeOfA = typeOfA;
     this.jsonMapper = Optional.ofNullable(json)
@@ -136,13 +150,12 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
 
     Function<List<StreamMessage<String, String>>, Stream<LeafCarrier<A>>> mapToLeaves = records ->
         Stream.ofAll(records)
-        .filter(e -> !e.isClaimed())
         .map(toRecord)
         .flatMap(e -> Stream.ofAll(e.stream()));
 
 
     return async
-        .xreadgroup(consumer, offset)
+        .xreadgroup(consumer, consumerReadArguments, offset)
         .toCompletableFuture()
         .thenApply(mapToLeaves);
   }
@@ -166,5 +179,71 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
   public void close() {
     this.connection.close();
     this.client.shutdown();
+  }
+
+  public static class Builder<A extends Leaf<M>, M> {
+    private final Class<A> typeOfA;
+    private final RedisClient client;
+    private final String key;
+    private final String consumerGroup;
+
+    private String consumerId;
+    private XReadArgs.StreamOffset<String> offset;
+    private Long count;
+    private XReadArgs consumerReadArguments;
+    private MapToStreamEntry<A> mapper;
+    private ObjectMapper json;
+
+    public Builder(Class<A> typeOfA, RedisClient client, String key, String consumerGroup) {
+      this.typeOfA = typeOfA;
+      this.client = client;
+      this.key = key;
+      this.consumerGroup = consumerGroup;
+    }
+
+    public Builder<A, M> consumerId(String consumerId) {
+      this.consumerId = consumerId;
+      return this;
+    }
+
+    public Builder<A, M> offset(XReadArgs.StreamOffset<String> offset) {
+      this.offset = offset;
+      return this;
+    }
+
+    public Builder<A, M> count(Long count) {
+      this.count = count;
+      return this;
+    }
+
+    public Builder<A, M> consumerReadArguments(XReadArgs args) {
+      this.consumerReadArguments = args;
+      return this;
+    }
+
+    public Builder<A, M> mapper(MapToStreamEntry<A> mapper) {
+      this.mapper = mapper;
+      return this;
+    }
+
+    public Builder<A, M> json(ObjectMapper json) {
+      this.json = json;
+      return this;
+    }
+
+    public RedisStreamProvider<A, M> build() {
+      return new RedisStreamProvider<>(
+          typeOfA,
+          client,
+          key,
+          consumerGroup,
+          consumerId,
+          offset,
+          count,
+          consumerReadArguments,
+          mapper,
+          json
+      );
+    }
   }
 }

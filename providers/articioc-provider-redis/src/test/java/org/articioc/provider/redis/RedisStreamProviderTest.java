@@ -11,6 +11,7 @@ import org.articioc.tests.scenarios.ProviderBasicBehavioursIntegrationTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.UUID;
 
 public class RedisStreamProviderTest extends RedisContainerTest
@@ -26,7 +27,7 @@ public class RedisStreamProviderTest extends RedisContainerTest
 
   private final Provider<TestLeaf> provider;
 
-  private final String key = "key:test:"+ UUID.randomUUID();
+  private final String key = "key:test:" + UUID.randomUUID();
   private final String consumerGroup = "test-group";
 
   public RedisStreamProviderTest() {
@@ -39,16 +40,17 @@ public class RedisStreamProviderTest extends RedisContainerTest
             consumerGroup,
             XGroupCreateArgs.Builder.mkstream());
 
-    this.provider = new RedisStreamProvider<>(
-      client,
-        key,
-        consumerGroup,
-        null,
-        null,
-        TestLeaf.class,
-        null,
-        null
-    );
+    this.provider = new RedisStreamProvider.Builder<>(
+          TestLeaf.class,
+          client,
+          key,
+          consumerGroup)
+        /* Forcing small time windows in order to test that messages are actually claimed when no ack is provided. */
+        .consumerReadArguments(
+            XReadArgs.Builder
+            .block(Duration.ofSeconds(2))
+            .claim(Duration.ofSeconds(1)))
+        .build();
   }
 
   @Override
