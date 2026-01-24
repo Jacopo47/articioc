@@ -1,3 +1,5 @@
+import com.diffplug.gradle.spotless.JavaExtension
+
 plugins {
 	id("java")
 	id("java-library")
@@ -109,6 +111,18 @@ allprojects {
 
 				suppressPomMetadataWarningsFor("testFixturesApiElements")
 				suppressPomMetadataWarningsFor("testFixturesRuntimeElements")
+			}
+		}
+
+		java {
+			withSourcesJar()
+			withJavadocJar()
+
+			targetCompatibility = JavaVersion.VERSION_21
+			sourceCompatibility = JavaVersion.VERSION_21
+
+			toolchain {
+				languageVersion.set(JavaLanguageVersion.of(21))
 			}
 		}
 
