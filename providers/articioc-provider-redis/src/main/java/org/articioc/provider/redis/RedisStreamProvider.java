@@ -20,12 +20,10 @@ import org.articioc.base.Leaf;
 import org.articioc.base.LeafCarrier;
 import org.articioc.base.interfaces.CommitOperation;
 import org.articioc.base.interfaces.Provider;
-import org.articioc.base.interfaces.RollbackOperation;
 import org.articioc.base.utils.Futures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
 
 public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
   public interface MapToStreamEntry<T> {
