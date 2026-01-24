@@ -8,11 +8,12 @@ import org.articioc.provider.redis.containers.RedisContainerTest;
 import org.articioc.tests.models.TestStep;
 import org.articioc.tests.scenarios.BasicProviderTestLeaf;
 import org.articioc.tests.scenarios.ProviderBasicBehavioursIntegrationTest;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import java.net.UnknownHostException;
 import java.util.UUID;
 
-class RedisStreamProviderTest extends RedisContainerTest
+public class RedisStreamProviderTest extends RedisContainerTest
     implements ProviderBasicBehavioursIntegrationTest<RedisStreamProviderTest.TestLeaf, TestStep> {
 
   public static class TestLeaf extends BasicProviderTestLeaf<TestStep> {
@@ -25,12 +26,12 @@ class RedisStreamProviderTest extends RedisContainerTest
 
   private final Provider<TestLeaf> provider;
 
-  public RedisStreamProviderTest() throws ClassNotFoundException, UnknownHostException {
+  private final String key = "key:test:"+ UUID.randomUUID();
+  private final String consumerGroup = "test-group";
+
+  public RedisStreamProviderTest() {
     var client = RedisClient.create(REDIS_CONTAINER.getRedisURI());
 
-    var key = "key:test:"+ UUID.randomUUID();
-
-    String consumerGroup = "test-group";
     client
         .connect()
         .sync()
@@ -48,6 +49,22 @@ class RedisStreamProviderTest extends RedisContainerTest
         null,
         null
     );
+  }
+
+  @Override
+  @Test
+  public void basicScenario() throws Exception {
+    ProviderBasicBehavioursIntegrationTest.super.basicScenario();
+
+    /* Verifying that no pending messages are left... */
+    try (var client = RedisClient.create(REDIS_CONTAINER.getRedisURI())) {
+      var pending = client
+          .connect()
+          .sync()
+          .xpending(key, consumerGroup);
+
+      Assertions.assertEquals(0, pending.getCount());
+    }
   }
 
   @Override
