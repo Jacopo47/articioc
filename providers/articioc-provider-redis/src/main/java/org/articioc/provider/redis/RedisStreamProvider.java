@@ -22,17 +22,14 @@ import org.articioc.base.LeafCarrier;
 import org.articioc.base.interfaces.CommitOperation;
 import org.articioc.base.interfaces.Provider;
 import org.articioc.base.utils.Futures;
+import org.articioc.provider.redis.serialization.interfaces.MapToJsonEntryInStream;
+import org.articioc.provider.redis.serialization.interfaces.MapToStreamEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
-  public interface MapToStreamEntry<T> {
-    Optional<Map<String, String>> serialize(T input);
-    Optional<T> deserialize(Map<String, String> input);
-  }
-
-  private static final Logger logger = LoggerFactory.getLogger(RedisStreamProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisStreamProvider.class);
 
   private static final Duration DEFAULT_READ_BLOCK_DURATION = Duration.ofSeconds(10);
   private static final Duration DEFAULT_READ_CLAIM_DURATION = Duration.ofMinutes(5);
@@ -51,7 +48,6 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
 
   private final Class<A> typeOfA;
   private final MapToStreamEntry<A> mapper;
-  private final ObjectMapper jsonMapper;
 
   public RedisStreamProvider(
       Class<A> typeOfA,
@@ -62,8 +58,7 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
       XReadArgs.StreamOffset<String> offset,
       Long count,
       XReadArgs consumerReadArguments,
-      MapToStreamEntry<A> mapper,
-      ObjectMapper json
+      MapToStreamEntry<A> mapper
   ) {
     this.client = Objects.requireNonNull(client);
     this.connection = this.client.connect();
@@ -85,41 +80,8 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
         .count(readCount);
 
     this.typeOfA = typeOfA;
-    this.jsonMapper = Optional.ofNullable(json)
-        .orElseGet(() -> new ObjectMapper()
-        .registerModule(new Jdk8Module())
-        .registerModule(new JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-        .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE));
-
     this.mapper = Optional.ofNullable(mapper)
-        .orElseGet(() -> new MapToStreamEntry<>() {
-          @Override
-          public Optional<Map<String, String>> serialize(A input) {
-            try {
-              return Optional.of(
-                  Map.of("entry", jsonMapper.writeValueAsString(input)));
-            } catch (JsonProcessingException ex) {
-              logger.error("Unable to serialize object", ex);
-              return Optional.empty();
-            }
-          }
-
-          @Override
-          public Optional<A> deserialize(Map<String, String> input) {
-            return Optional.ofNullable(input)
-                .map(e -> e.get("entry"))
-                .flatMap(e -> {
-                  try {
-                    return Optional.of(jsonMapper.readValue(e, typeOfA));
-                  } catch (JsonProcessingException ex) {
-                    logger.error("Unable to deserialize object", ex);
-                    return Optional.empty();
-                  }
-                });
-          }
-        });
-
+        .orElseGet(() -> new MapToJsonEntryInStream<>(this.typeOfA, null));
 
   }
 
@@ -241,8 +203,7 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
           offset,
           count,
           consumerReadArguments,
-          mapper,
-          json
+          mapper
       );
     }
   }
