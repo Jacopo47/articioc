@@ -10,12 +10,16 @@ import org.articioc.Articioc;
 import org.articioc.base.interfaces.Provider;
 import org.articioc.interfaces.oneTo.OneToOne;
 import org.articioc.tests.models.TestStep;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public interface ProviderBasicBehavioursIntegrationTest<B extends BasicProviderTestLeaf<M>, M>
     extends BasicOperationsProviderIntegrationTest<B, M> {
 
+  @AfterAll
   default void afterAll() throws Exception {
     provider().close();;
   }
