@@ -40,42 +40,37 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
   private final StatefulRedisConnection<String, String> connection;
   private final RedisStreamAsyncCommands<String, String> async;
   private final XReadArgs consumerReadArguments;
+  private final Function<A, XAddArgs> evaluateAddArguments;
 
   private final Class<A> typeOfA;
   private final MapToStreamEntry<A> mapper;
 
-  public RedisStreamProvider(
-      Class<A> typeOfA,
-      RedisClient client,
-      String key,
-      String consumerGroup,
-      String consumerId,
-      XReadArgs.StreamOffset<String> offset,
-      Long count,
-      XReadArgs consumerReadArguments,
-      MapToStreamEntry<A> mapper
-  ) {
-    this.client = Objects.requireNonNull(client);
+  private RedisStreamProvider(Builder<A, M> builder) {
+    this.client = Objects.requireNonNull(builder.client);
     this.connection = this.client.connect();
     this.async = this.connection.async();
 
-    this.key = Objects.requireNonNull(key);
-    this.consumerGroup = Objects.requireNonNull(consumerGroup);
-    this.consumerId = Optional.ofNullable(consumerId)
+    this.key = Objects.requireNonNull(builder.key);
+    this.consumerGroup = Objects.requireNonNull(builder.consumerGroup);
+    this.consumerId = Optional.ofNullable(builder.consumerId)
         .orElseGet(() -> this.getClass().getSimpleName() + "-" + UUID.randomUUID());
 
     this.consumer = Consumer.from(this.consumerGroup, this.consumerId);
-    this.offset = Optional.ofNullable(offset)
+    this.offset = Optional.ofNullable(builder.offset)
         .orElseGet(() -> XReadArgs.StreamOffset.lastConsumed(key));
-    var readCount = Optional.ofNullable(count)
+    var readCount = Optional.ofNullable(builder.count)
         .orElse(DEFAULT_SIZE_FOR_READ_RESULT);
-    this.consumerReadArguments = Optional.ofNullable(consumerReadArguments)
+    this.consumerReadArguments = Optional.ofNullable(builder.consumerReadArguments)
         .orElseGet(() -> XReadArgs.Builder.block(DEFAULT_READ_BLOCK_DURATION)
             .claim(DEFAULT_READ_CLAIM_DURATION))
         .count(readCount);
 
-    this.typeOfA = typeOfA;
-    this.mapper = Optional.ofNullable(mapper)
+    this.evaluateAddArguments = Optional.ofNullable(builder.dynamicAddArguments)
+        .orElseGet(() -> ignore -> Optional.ofNullable(builder.staticAddArguments)
+            .orElseGet(XAddArgs::new));
+
+    this.typeOfA = builder.typeOfA;
+    this.mapper = Optional.ofNullable(builder.mapper)
         .orElseGet(() -> new MapToJsonEntryInStream<>(this.typeOfA, null));
 
   }
@@ -121,7 +116,7 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
   public CompletableFuture<A> write(A leaf) {
     return Optional.ofNullable(leaf)
         .flatMap(mapper::serialize)
-        .map(e -> async.xadd(key, e))
+        .map(e -> async.xadd(key, evaluateAddArguments.apply(leaf), e))
         .map(CompletionStage::toCompletableFuture)
         .orElseGet(() -> CompletableFuture.failedFuture(new Exception("Unable to write due to null input")))
         .thenApply(ignore -> leaf);
@@ -149,7 +144,8 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
     private Long count;
     private XReadArgs consumerReadArguments;
     private MapToStreamEntry<A> mapper;
-    private ObjectMapper json;
+    private XAddArgs staticAddArguments;
+    private Function<A, XAddArgs> dynamicAddArguments;
 
     public Builder(Class<A> typeOfA, RedisClient client, String key, String consumerGroup) {
       this.typeOfA = typeOfA;
@@ -183,23 +179,18 @@ public class RedisStreamProvider<A extends Leaf<M>, M> implements Provider<A> {
       return this;
     }
 
-    public Builder<A, M> json(ObjectMapper json) {
-      this.json = json;
+    public Builder<A, M> addArgument(XAddArgs args) {
+      this.staticAddArguments = args;
+      return this;
+    }
+
+    public Builder<A, M> addArgument(Function<A, XAddArgs> evaluateArgs) {
+      this.dynamicAddArguments = evaluateArgs;
       return this;
     }
 
     public RedisStreamProvider<A, M> build() {
-      return new RedisStreamProvider<>(
-          typeOfA,
-          client,
-          key,
-          consumerGroup,
-          consumerId,
-          offset,
-          count,
-          consumerReadArguments,
-          mapper
-      );
+      return new RedisStreamProvider<>(this);
     }
   }
 }
