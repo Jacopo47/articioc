@@ -6,6 +6,7 @@ awaitility = "4.3.0"
 jackson = "2.21.0"
 kafka = "4.1.1"
 jdbi = "3.51.0"
+redis-lettuce = "7.2.1.RELEASE"
 
 [libraries]
 # Libraries
@@ -19,6 +20,8 @@ jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-datab
 jackson-datatype = {group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jdk8", version.ref = "jackson" }
 jackson-jsr310 = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version.ref = "jackson" }
 kafka-client = {group = "org.apache.kafka", name = "kafka-clients", version.ref= "kafka"}
+
+redis-lettuce = {group = "io.lettuce", name = "lettuce-core", version.ref= "redis-lettuce"}
 
 jdbi-core = {group = "org.jdbi", name = "jdbi3-core", version.ref= "jdbi"}
 jdbi-sqlobject = {group = "org.jdbi", name = "jdbi3-sqlobject", version.ref= "jdbi"}

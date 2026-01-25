@@ -32,8 +32,7 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
       String topic,
       Properties consumerProperties,
       Properties producerProperties,
-      Duration pollTimeout)
-      throws ClassNotFoundException {
+      Duration pollTimeout) {
     this.topic = topic;
 
     consumerProperties.put(
@@ -56,8 +55,7 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
   }
 
   public KafkaProvider(
-      Class<A> type, String topic, Properties consumerProperties, Properties producerProperties)
-      throws ClassNotFoundException {
+      Class<A> type, String topic, Properties consumerProperties, Properties producerProperties) {
     this(type, topic, consumerProperties, producerProperties, null);
   }
 
@@ -75,7 +73,15 @@ public class KafkaProvider<A extends Leaf<M>, M> implements Provider<A> {
                       new OffsetAndMetadata(r.offset())));
 
                   return v;
-                })))
+                }))
+                .withRollback(options -> CompletableFuture.supplyAsync(() -> {
+                  consumer.seek(
+                      new TopicPartition(r.topic(), r.partition()),
+                      new OffsetAndMetadata(r.offset()));
+
+                  return v;
+                }))
+            )
             .orElseThrow());
 
     return CompletableFuture.completedFuture(app);

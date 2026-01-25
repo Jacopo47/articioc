@@ -1,5 +1,3 @@
-import com.diffplug.gradle.spotless.JavaExtension
-
 plugins {
 	id("java")
 	id("java-library")
@@ -95,13 +93,18 @@ allprojects {
 		}
 	}
 
+	apply(plugin = "java-library")
+	dependencies {
+		testImplementation("ch.qos.logback:logback-core:1.5.25")
+		testImplementation("ch.qos.logback:logback-classic:1.5.25")
+	}
+
 
 	if (!File(projectDir, "build.gradle.kts").exists()) {
 		logger.warn("Skipping publication for ${project.name} because is not a gradle project.")
 		return@allprojects
 	}
 	apply(plugin = "maven-publish")
-	apply(plugin = "java-library")
 	configure<PublishingExtension> {
 		publications {
 			create<MavenPublication>(rootProject.name) {
@@ -116,7 +119,6 @@ allprojects {
 
 		java {
 			withSourcesJar()
-			withJavadocJar()
 
 			targetCompatibility = JavaVersion.VERSION_21
 			sourceCompatibility = JavaVersion.VERSION_21
