@@ -1,6 +1,5 @@
 package org.articioc.provider.redis;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.lettuce.core.*;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisStreamAsyncCommands;
