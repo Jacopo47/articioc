@@ -26,7 +26,7 @@ dependencies {
 
 
 	testImplementation(testFixtures(project(":")))
-	testImplementation("com.redis:testcontainers-redis:2.2.2")
+	testImplementation("com.redis:testcontainers-redis:2.2.4")
 
 }
 
