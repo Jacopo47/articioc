@@ -29,7 +29,7 @@ jdbi-stringtemplate4 = {group = "org.jdbi", name = "jdbi3-stringtemplate4", vers
 
 testcontainers-kafka = {group = "org.testcontainers", name = "kafka", version = "1.21.4"}
 
-mockito = { group = "org.mockito", name = "mockito-core", version = "5.21.0" }
+mockito = { group = "org.mockito", name = "mockito-core", version = "5.23.0" }
 
 # Platforms (BOMs)
 junit-bom = { group = "org.junit", name = "junit-bom", version.ref = "junitBom" }
