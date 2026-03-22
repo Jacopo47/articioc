@@ -6,7 +6,7 @@ plugins {
 
 	id("jacoco-report-aggregation")
 
-	id("com.diffplug.spotless") version "8.1.0"
+	id("com.diffplug.spotless") version "8.3.0"
 }
 
 group = "org.articioc"
