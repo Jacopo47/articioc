@@ -38,43 +38,6 @@ import org.articioc.interfaces.triggers.FutureTriggerOfOne;
 import org.articioc.interfaces.triggers.TriggerOfMany;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-class PipelineStep<A, S> {
-  private final S from;
-  private final S to;
-  private Pipeline<A> pipeline;
-  private ErrorPipeline<A> errorPipeline;
-
-  public PipelineStep(S from, S to, Pipeline<A> pipeline, ErrorPipeline<A> errorPipeline) {
-    this.from = Objects.requireNonNull(from);
-    this.to = Objects.requireNonNull(to);
-    this.pipeline = Objects.requireNonNull(pipeline);
-    this.errorPipeline = Objects.requireNonNull(errorPipeline);
-  }
-
-  public S getFrom() {
-    return from;
-  }
-
-  public S getTo() {
-    return to;
-  }
-
-  public Pipeline<A> getPipeline() {
-    return pipeline;
-  }
-
-  public ErrorPipeline<A> getErrorPipeline() {
-    return errorPipeline;
-  }
-
-  public PipelineStep<A, S> andThen(Pipeline<A> next) {
-    this.pipeline = pipeline.andThen(next);
-
-    return this;
-  }
-}
-
 public class Articioc<A extends Leaf<M>, M> implements ToPipeline<A, M>, AutonomousExecutor<A, M> {
 
   private static final Logger logger = LoggerFactory.getLogger(Articioc.class);
@@ -415,6 +378,42 @@ public class Articioc<A extends Leaf<M>, M> implements ToPipeline<A, M>, Autonom
           pipeline,
           errorPipeline,
           to);
+    }
+  }
+
+  static final class PipelineStep<A, S> {
+    private final S from;
+    private final S to;
+    private Pipeline<A> pipeline;
+    private final ErrorPipeline<A> errorPipeline;
+
+    public PipelineStep(S from, S to, Pipeline<A> pipeline, ErrorPipeline<A> errorPipeline) {
+      this.from = Objects.requireNonNull(from);
+      this.to = Objects.requireNonNull(to);
+      this.pipeline = Objects.requireNonNull(pipeline);
+      this.errorPipeline = Objects.requireNonNull(errorPipeline);
+    }
+
+    public S getFrom() {
+      return from;
+    }
+
+    public S getTo() {
+      return to;
+    }
+
+    public Pipeline<A> getPipeline() {
+      return pipeline;
+    }
+
+    public ErrorPipeline<A> getErrorPipeline() {
+      return errorPipeline;
+    }
+
+    public PipelineStep<A, S> andThen(Pipeline<A> next) {
+      this.pipeline = pipeline.andThen(next);
+
+      return this;
     }
   }
 }
