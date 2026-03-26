@@ -5,7 +5,7 @@ junitBom = "5.10.0"
 awaitility = "4.3.0"
 jackson = "2.21.1"
 kafka = "4.1.1"
-jdbi = "3.51.0"
+jdbi = "3.52.0"
 redis-lettuce = "7.4.0.RELEASE"
 
 [libraries]
