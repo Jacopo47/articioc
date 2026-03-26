@@ -16,7 +16,7 @@ dependencies {
 	implementation("io.vavr:vavr:1.0.0")
 	implementation("com.konghq:unirest-java:3.14.5")
 
-	testImplementation(platform("org.junit:junit-bom:5.10.0"))
+	testImplementation(platform("org.junit:junit-bom:6.0.3"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
